@@ -1,0 +1,71 @@
+{
+  "app": {
+    "title": "Mes tâches"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "logout": "Se déconnecter",
+    "toggleTheme": "Changer de thème",
+    "error": "Une erreur est survenue"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "displayName": "Nom affiché",
+    "login": "Se connecter",
+    "loginTitle": "Connexion",
+    "register": "Créer un compte",
+    "registerTitle": "Inscription",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "errors": {
+      "emailInvalid": "Email invalide",
+      "passwordMin": "Le mot de passe doit contenir au moins 12 caractères",
+      "displayNameRequired": "Le nom affiché est requis",
+      "invalidCredentials": "Email ou mot de passe incorrect",
+      "emailTaken": "Cet email est déjà utilisé"
+    }
+  },
+  "tasks": {
+    "title": "Tâches",
+    "empty": "Aucune tâche pour le moment",
+    "new": "Nouvelle tâche",
+    "edit": "Modifier la tâche",
+    "delete": "Supprimer",
+    "complete": "Terminer",
+    "archive": "Archiver",
+    "search": "Rechercher…",
+    "form": {
+      "title": "Titre",
+      "description": "Description",
+      "priority": "Priorité",
+      "category": "Catégorie",
+      "tags": "Tags (séparés par des virgules)",
+      "dueDate": "Date limite",
+      "color": "Couleur",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "titleRequired": "Le titre est requis"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "Haute",
+      "normal": "Normale",
+      "low": "Basse"
+    },
+    "status": {
+      "todo": "À faire",
+      "in_progress": "En cours",
+      "done": "Terminée",
+      "archived": "Archivée",
+      "all": "Toutes"
+    },
+    "toasts": {
+      "created": "Tâche créée",
+      "updated": "Tâche mise à jour",
+      "completed": "Tâche terminée",
+      "archived": "Tâche archivée",
+      "deleted": "Tâche supprimée"
+    }
+  }
+}
