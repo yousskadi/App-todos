@@ -33,3 +33,22 @@ export interface TaskListOut {
   items: Task[]
   total: number
 }
+
+export interface Appointment {
+  id: string
+  title: string
+  description: string
+  location: string | null
+  start_at: string
+  end_at: string
+  category: string | null
+  color: string | null
+  reminder_minutes_before: number | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AppointmentListOut {
+  items: Appointment[]
+  total: number
+}
