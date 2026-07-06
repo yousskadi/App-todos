@@ -98,6 +98,7 @@ jobs:
           JWT_SECRET=secret-ci-uniquement-jamais-en-production
           EOF
           DATABASE_URL=postgresql+asyncpg://todos:todos-ci@localhost:5432/todos \
+          JWT_SECRET=secret-ci-uniquement-jamais-en-production \
             .venv/bin/alembic upgrade head
 
       - name: Préparer le frontend
