@@ -12,7 +12,12 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import create_app
 from app.middleware.rate_limit import limiter
-from app.models import refresh_session, task, user  # noqa: F401 — enregistre les modèles
+from app.models import (  # noqa: F401 — enregistre les modèles
+    appointment,
+    refresh_session,
+    task,
+    user,
+)
 
 # SQLite en mémoire par défaut (rapide, aucun service requis) ;
 # la CI fournit TEST_DATABASE_URL pointant sur Postgres.
