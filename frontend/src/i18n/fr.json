@@ -39,6 +39,7 @@
       "title": "Titre",
       "description": "Description",
       "priority": "Priorité",
+      "status": "Statut",
       "category": "Catégorie",
       "tags": "Tags (séparés par des virgules)",
       "dueDate": "Date limite",

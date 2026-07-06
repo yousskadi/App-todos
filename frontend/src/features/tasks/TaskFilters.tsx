@@ -37,7 +37,7 @@ export function TaskFilters({ filters, onChange }: TaskFiltersProps) {
           onChange({ ...filters, status: value === ALL ? undefined : (value as TaskStatus) })
         }
       >
-        <SelectTrigger className="sm:w-40" aria-label={t('tasks.form.priority')}>
+        <SelectTrigger className="sm:w-40" aria-label={t('tasks.form.status')}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

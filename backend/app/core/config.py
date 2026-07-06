@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 30
     # False en dev local (http) ; True dès qu'on sert en https
     cookie_secure: bool = False
+    # Désactivable pour les tests e2e (RATE_LIMIT_ENABLED=0) ; toujours True en prod
+    rate_limit_enabled: bool = True
     # Origines autorisées en dev (Vite) ; vide en prod car nginx proxifie /api
     cors_origins: list[str] = ["http://localhost:5173"]
 
