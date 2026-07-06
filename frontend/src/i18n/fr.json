@@ -2,6 +2,10 @@
   "app": {
     "title": "Mes tâches"
   },
+  "nav": {
+    "tasks": "Tâches",
+    "appointments": "Rendez-vous"
+  },
   "common": {
     "loading": "Chargement…",
     "logout": "Se déconnecter",
@@ -67,6 +71,51 @@
       "completed": "Tâche terminée",
       "archived": "Tâche archivée",
       "deleted": "Tâche supprimée"
+    }
+  },
+  "appointments": {
+    "title": "Rendez-vous",
+    "new": "Nouveau rendez-vous",
+    "edit": "Modifier le rendez-vous",
+    "delete": "Supprimer",
+    "today": "Aujourd'hui",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "addOn": "Ajouter un rendez-vous le {{date}}",
+    "weekdays": {
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mer",
+      "thu": "Jeu",
+      "fri": "Ven",
+      "sat": "Sam",
+      "sun": "Dim"
+    },
+    "form": {
+      "title": "Titre",
+      "description": "Description",
+      "location": "Lieu",
+      "start": "Début",
+      "end": "Fin",
+      "category": "Catégorie",
+      "reminder": "Rappel",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "titleRequired": "Le titre est requis",
+      "endAfterStart": "La fin doit être après le début"
+    },
+    "reminders": {
+      "none": "Aucun",
+      "5": "5 minutes avant",
+      "15": "15 minutes avant",
+      "30": "30 minutes avant",
+      "60": "1 heure avant",
+      "1440": "1 jour avant"
+    },
+    "toasts": {
+      "created": "Rendez-vous créé",
+      "updated": "Rendez-vous mis à jour",
+      "deleted": "Rendez-vous supprimé"
     }
   }
 }
