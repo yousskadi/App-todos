@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     # Logs JSON structurés sur stdout, corrélés aux traces (trace_id/span_id).
     # Désactivé par défaut : activer via LOG_JSON=1.
     log_json: bool = False
+    # Métriques Prometheus (GET /metrics). Désactivé par défaut : METRICS_ENABLED=1.
+    metrics_enabled: bool = False
 
 
 @lru_cache
