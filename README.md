@@ -66,4 +66,9 @@ cd frontend && npm run test:e2e
 
 ## CI
 
-Le workflow [`ci.yml`](.github/workflows/ci.yml) tourne sur chaque push/PR vers `main` : lint + tests backend contre Postgres 17, lint + build frontend, puis tests e2e Playwright (rapport uploadé en artefact en cas d'échec).
+Le workflow [`ci.yml`](.github/workflows/ci.yml) tourne sur chaque push/PR vers `main` : lint + tests backend contre Postgres 17, lint + build frontend, tests e2e Playwright (rapport uploadé en artefact en cas d'échec), plus les scans de sécurité — gitleaks (secrets), pip-audit/npm audit (dépendances), Trivy (image Docker, avant publication GHCR) et [CodeQL](.github/workflows/codeql.yml) (analyse statique). Guide de compréhension : [docs/securite-ci.md](docs/securite-ci.md).
+
+## Documentation
+
+- [docs/securite-ci.md](docs/securite-ci.md) — comprendre chaque scan de la CI et les réflexes associés
+- [docs/adr/](docs/adr/) — décisions d'architecture (sécurité CI/CD, observabilité trois signaux)
