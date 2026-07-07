@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     otel_service_name: str = "todos-backend"
     # Endpoint OTLP/gRPC du collecteur (Alloy en cluster, otel-collector en local)
     otel_exporter_otlp_endpoint: str = "http://localhost:4317"
+    # Logs JSON structurés sur stdout, corrélés aux traces (trace_id/span_id).
+    # Désactivé par défaut : activer via LOG_JSON=1.
+    log_json: bool = False
 
 
 @lru_cache
