@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = True
     # Origines autorisées en dev (Vite) ; vide en prod car nginx proxifie /api
     cors_origins: list[str] = ["http://localhost:5173"]
+    # OpenTelemetry (traces). Désactivé par défaut : activer via OTEL_ENABLED=1.
+    otel_enabled: bool = False
+    otel_service_name: str = "todos-backend"
+    # Endpoint OTLP/gRPC du collecteur (Alloy en cluster, otel-collector en local)
+    otel_exporter_otlp_endpoint: str = "http://localhost:4317"
 
 
 @lru_cache
