@@ -5,8 +5,10 @@ from slowapi.extension import _rate_limit_exceeded_handler
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
+from app.db.session import engine
 from app.middleware.rate_limit import limiter
 from app.middleware.security_headers import SecurityHeadersMiddleware
+from app.telemetry import setup_telemetry
 
 
 def create_app() -> FastAPI:
@@ -37,3 +39,5 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
+# Traçage OpenTelemetry (no-op si OTEL_ENABLED n'est pas actif).
+setup_telemetry(app, engine)
