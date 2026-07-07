@@ -1,0 +1,7 @@
+# Config gitleaks : règles par défaut + exceptions
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Mots de passe factices utilisés par les tests backend"
+paths = ['''backend/tests/.*''']
