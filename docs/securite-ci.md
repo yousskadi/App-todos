@@ -119,9 +119,35 @@ marquer *dismissed* avec une justification si c'est un faux positif.
   lieu de `@v7`. Un tag peut être déplacé vers du code malveillant après
   coup ; un SHA est immuable. C'est la parade directe à l'attaque
   `tj-actions/changed-files` de mars 2025.
-- **Protection de branche `main`** : PR obligatoire, les 6 checks verts
-  requis, pas de force-push. Personne (y compris un token volé) ne pousse
-  directement sur main.
+- **Protection de branche `main`** : PR obligatoire, les 8 checks verts
+  requis (les 6 ci-dessus + les 2 analyses CodeQL `python` et
+  `javascript-typescript`), pas de force-push. Personne (y compris un token
+  volé) ne pousse directement sur main. Voir *Pourquoi le gate est la
+  protection de branche* ci-dessous.
+
+## Pourquoi le gate est la protection de branche, pas le workflow
+
+`ci.yml` et `codeql.yml` sont **deux workflows séparés**. Sur GitHub Actions,
+un `needs:` ne peut référencer que des jobs *du même workflow* : `ci.yml` ne
+peut donc pas « attendre » CodeQL. Concrètement, sur `main`, la publication de
+l'image (job `image`) ne dépend que de `backend`, `e2e` et du scan Trivy — pas
+de CodeQL. Si on comptait sur le workflow pour bloquer, une alerte CodeQL
+n'empêcherait ni le merge ni le push de l'image.
+
+Le vrai garde-fou est donc la **branch protection**, pas le pipeline : tant que
+les 2 checks CodeQL sont *required*, une PR avec une alerte SAST ne peut pas
+être mergée. Et comme l'image n'est publiée qu'*après* le merge, elle hérite
+toujours d'un code déjà passé au SAST. C'est le même principe que les tests :
+ils bloquent parce qu'ils sont *required*, pas parce qu'un job les attend.
+
+> Piège à éviter : laisser CodeQL tourner sans le rendre *required*. Il
+> s'affiche alors sur la PR (rassurant), mais reste purement informatif — une
+> PR rouge CodeQL passe quand même. Un scan non bloquant n'est pas un contrôle.
+
+**`strict` laissé désactivé** : l'option « branche à jour avec `main` avant
+merge » n'est pas activée. En mono-mainteneur, la friction (rebaser avant
+chaque merge) dépasse le gain ; le flip est trivial si le dépôt gagne des
+contributeurs.
 
 ## Réflexes au quotidien
 
