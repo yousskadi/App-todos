@@ -119,11 +119,11 @@ marquer *dismissed* avec une justification si c'est un faux positif.
   lieu de `@v7`. Un tag peut être déplacé vers du code malveillant après
   coup ; un SHA est immuable. C'est la parade directe à l'attaque
   `tj-actions/changed-files` de mars 2025.
-- **Protection de branche `main`** : PR obligatoire, les 8 checks verts
-  requis (les 6 ci-dessus + les 2 analyses CodeQL `python` et
-  `javascript-typescript`), pas de force-push. Personne (y compris un token
-  volé) ne pousse directement sur main. Voir *Pourquoi le gate est la
-  protection de branche* ci-dessous.
+- **Protection de branche `main`** : PR obligatoire, les 9 checks verts
+  requis (les 6 ci-dessus, les 2 analyses CodeQL `python` et
+  `javascript-typescript`, et le check de résultats `CodeQL`), pas de
+  force-push. Personne (y compris un token volé) ne pousse directement sur
+  main. Voir *Pourquoi le gate est la protection de branche* ci-dessous.
 
 ## Pourquoi le gate est la protection de branche, pas le workflow
 
@@ -134,15 +134,23 @@ l'image (job `image`) ne dépend que de `backend`, `e2e` et du scan Trivy — pa
 de CodeQL. Si on comptait sur le workflow pour bloquer, une alerte CodeQL
 n'empêcherait ni le merge ni le push de l'image.
 
-Le vrai garde-fou est donc la **branch protection**, pas le pipeline : tant que
-les 2 checks CodeQL sont *required*, une PR avec une alerte SAST ne peut pas
-être mergée. Et comme l'image n'est publiée qu'*après* le merge, elle hérite
-toujours d'un code déjà passé au SAST. C'est le même principe que les tests :
-ils bloquent parce qu'ils sont *required*, pas parce qu'un job les attend.
+Le vrai garde-fou est donc la **branch protection**, pas le pipeline. Avec un
+détail qui compte : les jobs `analyze (python)` / `analyze
+(javascript-typescript)` prouvent seulement que l'analyse *a tourné* — ils
+réussissent même quand CodeQL trouve des failles. Le verdict est porté par un
+check séparé, nommé simplement `CodeQL`, que GitHub ajoute à chaque PR : il
+échoue si la PR introduit de nouvelles alertes (sévérité *high* ou plus par
+défaut, réglable dans Settings → Code security). C'est donc **lui** qu'il faut
+rendre *required* pour bloquer le merge. Et comme l'image n'est publiée
+qu'*après* le merge, elle hérite toujours d'un code déjà passé au SAST. C'est
+le même principe que les tests : ils bloquent parce qu'ils sont *required*,
+pas parce qu'un job les attend.
 
-> Piège à éviter : laisser CodeQL tourner sans le rendre *required*. Il
-> s'affiche alors sur la PR (rassurant), mais reste purement informatif — une
-> PR rouge CodeQL passe quand même. Un scan non bloquant n'est pas un contrôle.
+> Piège à éviter : ne rendre *required* que les jobs `analyze`. Tout semble
+> gaté (l'analyse est obligatoire), mais une PR qui introduit une faille a ses
+> jobs `analyze` verts et peut être mergée — seul le check de résultats
+> `CodeQL` passe au rouge, et tant qu'il n'est pas *required*, il reste
+> purement informatif. Un scan non bloquant n'est pas un contrôle.
 
 **`strict` laissé désactivé** : l'option « branche à jour avec `main` avant
 merge » n'est pas activée. En mono-mainteneur, la friction (rebaser avant
