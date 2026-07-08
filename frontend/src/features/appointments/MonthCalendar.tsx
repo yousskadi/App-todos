@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
 import { dayKey, monthGridDays } from '@/features/appointments/calendar'
+import { categoryOf } from '@/features/categories/categories'
 import { cn } from '@/lib/utils'
 import type { Appointment } from '@/types/api'
 
@@ -69,27 +70,42 @@ export function MonthCalendar({
               >
                 {day.getDate()}
               </div>
-              {dayAppointments.map((appointment) => (
-                <button
-                  key={appointment.id}
-                  type="button"
-                  data-testid="calendar-appointment"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onAppointmentClick(appointment)
-                  }}
-                  className="block w-full truncate rounded border-l-2 bg-accent px-1 py-0.5 text-left text-xs hover:bg-accent/80"
-                  style={{ borderLeftColor: appointment.color ?? 'var(--primary)' }}
-                >
-                  <span className="font-medium">
-                    {new Date(appointment.start_at).toLocaleTimeString('fr-FR', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>{' '}
-                  {appointment.title}
-                </button>
-              ))}
+              {dayAppointments.map((appointment) => {
+                const category = categoryOf(appointment.category)
+                const color = appointment.color ?? category?.color
+                const Icon = category?.icon
+                return (
+                  <button
+                    key={appointment.id}
+                    type="button"
+                    data-testid="calendar-appointment"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onAppointmentClick(appointment)
+                    }}
+                    className="block w-full truncate rounded border-l-2 bg-accent px-1 py-0.5 text-left text-xs hover:opacity-80"
+                    style={{
+                      borderLeftColor: color ?? 'var(--primary)',
+                      backgroundColor: color ? `${color}1f` : undefined,
+                    }}
+                  >
+                    {Icon && (
+                      <Icon
+                        aria-hidden
+                        className="mr-0.5 inline size-3 align-[-2px]"
+                        style={{ color: category?.color }}
+                      />
+                    )}
+                    <span className="font-medium">
+                      {new Date(appointment.start_at).toLocaleTimeString('fr-FR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>{' '}
+                    {appointment.title}
+                  </button>
+                )
+              })}
             </div>
           )
         })}

@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { TASK_CATEGORIES } from '@/features/categories/categories'
 import type { TaskFilters as Filters } from '@/features/tasks/api'
 import type { TaskPriority, TaskStatus } from '@/types/api'
 
@@ -63,6 +64,25 @@ export function TaskFilters({ filters, onChange }: TaskFiltersProps) {
           {PRIORITIES.map((priority) => (
             <SelectItem key={priority} value={priority}>
               {t(`tasks.priority.${priority}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={filters.category ?? ALL}
+        onValueChange={(value) =>
+          onChange({ ...filters, category: value === ALL ? undefined : value })
+        }
+      >
+        <SelectTrigger className="sm:w-40" aria-label={t('tasks.form.category')}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>{t('tasks.status.all')}</SelectItem>
+          {TASK_CATEGORIES.map((category) => (
+            <SelectItem key={category.slug} value={category.slug}>
+              <category.icon style={{ color: category.color }} />
+              {t(`categories.${category.slug}`)}
             </SelectItem>
           ))}
         </SelectContent>

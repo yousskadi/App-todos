@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { ClipboardList, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -47,7 +47,13 @@ export function TasksPage() {
           ))}
         </div>
       ) : (
-        <p className="py-8 text-center text-muted-foreground">{t('tasks.empty')}</p>
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <div className="flex size-14 items-center justify-center rounded-full bg-primary/10">
+            <ClipboardList className="size-7 text-primary" aria-hidden />
+          </div>
+          <p className="text-muted-foreground">{t('tasks.empty')}</p>
+          <p className="text-sm text-muted-foreground/70">{t('tasks.emptyHint')}</p>
+        </div>
       )}
 
       <TaskForm open={formOpen} onClose={() => setFormOpen(false)} task={editingTask} />

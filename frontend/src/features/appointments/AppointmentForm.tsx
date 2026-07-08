@@ -28,6 +28,8 @@ import {
   useUpdateAppointment,
 } from '@/features/appointments/api'
 import { toLocalInputValue } from '@/features/appointments/calendar'
+import { APPOINTMENT_CATEGORIES } from '@/features/categories/categories'
+import { CategorySelect } from '@/features/categories/CategorySelect'
 import type { Appointment } from '@/types/api'
 
 const REMINDERS = ['none', '5', '15', '30', '60', '1440'] as const
@@ -183,8 +185,14 @@ export function AppointmentForm({ open, onClose, appointment, defaultDay }: Appo
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="appointment-category">{t('appointments.form.category')}</Label>
-              <Input id="appointment-category" {...register('category')} />
+              <Label>{t('appointments.form.category')}</Label>
+              <CategorySelect
+                key={String(open)}
+                categories={APPOINTMENT_CATEGORIES}
+                value={watch('category')}
+                onChange={(value) => setValue('category', value)}
+                ariaLabel={t('appointments.form.category')}
+              />
             </div>
             <div className="space-y-2">
               <Label>{t('appointments.form.reminder')}</Label>

@@ -6,6 +6,24 @@
     "tasks": "Tâches",
     "appointments": "Rendez-vous"
   },
+  "categories": {
+    "none": "Aucune",
+    "custom": "Autre…",
+    "customLabel": "Catégorie personnalisée",
+    "medecin": "Médecin",
+    "dentiste": "Dentiste",
+    "coiffeur": "Coiffeur",
+    "garage": "Garage",
+    "examen": "Examen",
+    "administratif": "Administratif",
+    "sport": "Sport",
+    "travail": "Travail",
+    "poubelles": "Poubelles",
+    "courses": "Courses",
+    "menage": "Ménage",
+    "papiers": "Papiers",
+    "maison": "Maison"
+  },
   "common": {
     "loading": "Chargement…",
     "logout": "Se déconnecter",
@@ -33,6 +51,7 @@
   "tasks": {
     "title": "Tâches",
     "empty": "Aucune tâche pour le moment",
+    "emptyHint": "Créez votre première tâche avec le bouton ci-dessus.",
     "new": "Nouvelle tâche",
     "edit": "Modifier la tâche",
     "delete": "Supprimer",
