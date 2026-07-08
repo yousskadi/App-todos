@@ -64,3 +64,32 @@ async def test_scrape_non_compte(metrics_client):
     await metrics_client.get("/metrics")
     corps = (await metrics_client.get("/metrics")).text
     assert 'route="/metrics"' not in corps
+
+
+async def test_exemplar_trace_id_en_openmetrics(metrics_client):
+    # Avec un span actif, la latence porte un exemplar trace_id, visible
+    # seulement au format OpenMetrics (négocié via l'en-tête Accept).
+    from opentelemetry.sdk.trace import TracerProvider
+
+    tracer = TracerProvider().get_tracer("test")
+    with tracer.start_as_current_span("req") as span:
+        assert (await metrics_client.get("/api/v1/health")).status_code == 200
+        trace_id = format(span.get_span_context().trace_id, "032x")
+
+    response = await metrics_client.get(
+        "/metrics", headers={"Accept": "application/openmetrics-text"}
+    )
+    assert "application/openmetrics-text" in response.headers["content-type"]
+    assert f'# {{trace_id="{trace_id}"}}' in response.text
+
+
+async def test_exemplar_absent_du_format_classique(metrics_client):
+    # Sans en-tête OpenMetrics, le format texte classique n'expose pas d'exemplar.
+    from opentelemetry.sdk.trace import TracerProvider
+
+    tracer = TracerProvider().get_tracer("test")
+    with tracer.start_as_current_span("req"):
+        await metrics_client.get("/api/v1/health")
+
+    corps = (await metrics_client.get("/metrics")).text
+    assert "trace_id" not in corps

@@ -14,19 +14,19 @@ Deux métriques suffisent pour la méthode RED :
 Le label route est le *gabarit* de la route (/api/v1/tasks/{task_id}), jamais
 le chemin réel, sinon chaque id créerait une série (explosion de cardinalité).
 
+Chaque mesure de latence porte un *exemplar* (le trace_id de la trace en
+cours) : dans Grafana, on saute d'un point du graphe RED vers la trace Tempo
+correspondante. Les exemplars ne transitent qu'au format OpenMetrics.
+
 Désactivé par défaut : activer via METRICS_ENABLED=1.
 """
 
 import time
 
 from fastapi import FastAPI
-from prometheus_client import (
-    CONTENT_TYPE_LATEST,
-    CollectorRegistry,
-    Counter,
-    Histogram,
-    generate_latest,
-)
+from opentelemetry import trace
+from prometheus_client import CollectorRegistry, Counter, Histogram
+from prometheus_client.exposition import choose_encoder
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -72,7 +72,15 @@ class RequestMetricsMiddleware(BaseHTTPMiddleware):
 
         labels = {"method": request.method, "route": template}
         self.requests_total.labels(**labels, status=response.status_code).inc()
-        self.request_duration.labels(**labels).observe(elapsed)
+
+        # Exemplar : rattache la mesure de latence à la trace courante, ce qui
+        # permet à Grafana de sauter d'un point du graphe vers la trace Tempo.
+        # Seulement si un span est actif (sinon OTEL désactivé, span invalide).
+        exemplar = None
+        span_context = trace.get_current_span().get_span_context()
+        if span_context.is_valid:
+            exemplar = {"trace_id": format(span_context.trace_id, "032x")}
+        self.request_duration.labels(**labels).observe(elapsed, exemplar=exemplar)
         return response
 
 
@@ -109,6 +117,10 @@ def setup_metrics(app: FastAPI) -> None:
 
     # Hors de /api/v1 : scrapé en direct sur le port du pod, jamais proxifié
     # par nginx, donc jamais exposé au navigateur.
+    # Le format est négocié via l'en-tête Accept : Prometheus demande
+    # OpenMetrics, seul format qui porte les exemplars (le texte classique les
+    # ignore silencieusement).
     @app.get("/metrics", include_in_schema=False)
-    def metrics() -> Response:
-        return Response(generate_latest(registry), media_type=CONTENT_TYPE_LATEST)
+    def metrics(request: Request) -> Response:
+        encoder, content_type = choose_encoder(request.headers.get("Accept", ""))
+        return Response(encoder(registry), media_type=content_type)
