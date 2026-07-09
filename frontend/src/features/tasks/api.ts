@@ -7,6 +7,7 @@ export interface TaskFilters {
   q?: string
   status?: TaskStatus
   priority?: TaskPriority
+  category?: string
 }
 
 export interface TaskPayload {

@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { TASK_CATEGORIES } from '@/features/categories/categories'
+import { CategorySelect } from '@/features/categories/CategorySelect'
 import { useCreateTask, useUpdateTask } from '@/features/tasks/api'
 import type { Task, TaskPriority } from '@/types/api'
 
@@ -142,8 +144,14 @@ export function TaskForm({ open, onClose, task }: TaskFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="task-category">{t('tasks.form.category')}</Label>
-              <Input id="task-category" {...register('category')} />
+              <Label>{t('tasks.form.category')}</Label>
+              <CategorySelect
+                key={String(open)}
+                categories={TASK_CATEGORIES}
+                value={watch('category')}
+                onChange={(value) => setValue('category', value)}
+                ariaLabel={t('tasks.form.category')}
+              />
             </div>
           </div>
           <div className="space-y-2">

@@ -5,6 +5,8 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { categoryOf } from '@/features/categories/categories'
+import { CategoryBadge } from '@/features/categories/CategoryBadge'
 import { useArchiveTask, useCompleteTask, useDeleteTask } from '@/features/tasks/api'
 import type { Task, TaskPriority } from '@/types/api'
 
@@ -27,8 +29,8 @@ export function TaskCard({ task, onEdit }: { task: Task; onEdit: (task: Task) =>
   return (
     <Card
       data-testid="task-card"
-      className="border-l-4"
-      style={{ borderLeftColor: task.color ?? 'transparent' }}
+      className="border-l-4 transition-shadow hover:shadow-md"
+      style={{ borderLeftColor: task.color ?? categoryOf(task.category)?.color ?? 'transparent' }}
     >
       <CardContent className="flex items-start justify-between gap-3">
         <div className="min-w-0 space-y-1">
@@ -43,7 +45,7 @@ export function TaskCard({ task, onEdit }: { task: Task; onEdit: (task: Task) =>
               {t(`tasks.priority.${task.priority}`)}
             </Badge>
             <Badge variant="outline">{t(`tasks.status.${task.status}`)}</Badge>
-            {task.category && <Badge variant="secondary">{task.category}</Badge>}
+            {task.category && <CategoryBadge value={task.category} />}
             {task.tags.map((tag) => (
               <Badge key={tag} variant="outline">
                 #{tag}
