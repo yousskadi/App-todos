@@ -3,8 +3,19 @@
     "title": "Mes tâches"
   },
   "nav": {
+    "today": "Ma journée",
     "tasks": "Tâches",
     "appointments": "Rendez-vous"
+  },
+  "today": {
+    "greeting": "Bonjour {{name}} 👋",
+    "tasksTitle": "Tâches du jour",
+    "allTasks": "Toutes les tâches",
+    "overdue": "En retard",
+    "noTasks": "Rien à faire aujourd'hui, profitez-en !",
+    "appointmentsTitle": "Prochains rendez-vous",
+    "calendar": "Voir le calendrier",
+    "noAppointments": "Aucun rendez-vous dans les 7 prochains jours"
   },
   "categories": {
     "none": "Aucune",

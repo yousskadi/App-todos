@@ -8,7 +8,7 @@ export function uniqueEmail(): string {
   return `e2e-${Date.now()}-${process.pid}-${counter++}@test.dev`
 }
 
-/** Crée un compte via le formulaire d'inscription et attend l'arrivée sur /tasks. */
+/** Crée un compte via le formulaire d'inscription, puis navigue sur /tasks. */
 export async function registerUser(page: Page): Promise<string> {
   const email = uniqueEmail()
   await page.goto('/register')
@@ -16,6 +16,8 @@ export async function registerUser(page: Page): Promise<string> {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Mot de passe').fill(PASSWORD)
   await page.getByRole('button', { name: 'Créer un compte' }).click()
+  await expect(page).toHaveURL(/\/today$/)
+  await page.getByRole('link', { name: 'Tâches', exact: true }).click()
   await expect(page).toHaveURL(/\/tasks$/)
   return email
 }

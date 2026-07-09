@@ -30,13 +30,13 @@ export function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
 
-  if (user) return <Navigate to="/tasks" replace />
+  if (user) return <Navigate to="/today" replace />
 
   const onSubmit = async (values: LoginForm) => {
     setServerError(null)
     try {
       await login(values.email, values.password)
-      navigate('/tasks', { replace: true })
+      navigate('/today', { replace: true })
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 401) {
         setServerError(t('auth.errors.invalidCredentials'))

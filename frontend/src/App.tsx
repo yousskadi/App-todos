@@ -6,6 +6,7 @@ import { AppointmentsPage } from '@/pages/AppointmentsPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { TasksPage } from '@/pages/TasksPage'
+import { TodayPage } from '@/pages/TodayPage'
 
 export default function App() {
   return (
@@ -14,11 +15,12 @@ export default function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
+          <Route path="/today" element={<TodayPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/appointments" element={<AppointmentsPage />} />
         </Route>
       </Route>
-      <Route path="*" element={<Navigate to="/tasks" replace />} />
+      <Route path="*" element={<Navigate to="/today" replace />} />
     </Routes>
   )
 }
