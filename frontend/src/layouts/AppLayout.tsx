@@ -24,7 +24,7 @@ export function AppLayout() {
               <h1 className="text-lg font-semibold">{t('app.title')}</h1>
             </div>
             <nav className="flex items-center gap-1">
-              {(['tasks', 'appointments'] as const).map((section) => (
+              {(['today', 'tasks', 'appointments'] as const).map((section) => (
                 <NavLink
                   key={section}
                   to={`/${section}`}

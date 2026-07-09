@@ -43,8 +43,8 @@ test('déconnexion puis reconnexion avec le même compte', async ({ page }) => {
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Mot de passe').fill(PASSWORD)
   await page.getByRole('button', { name: 'Se connecter' }).click()
-  await expect(page).toHaveURL(/\/tasks$/)
-  await expect(page.getByText('Youssef E2E')).toBeVisible()
+  await expect(page).toHaveURL(/\/today$/)
+  await expect(page.getByText('Youssef E2E').first()).toBeVisible()
 })
 
 test('la session survit à un rechargement de page', async ({ page }) => {

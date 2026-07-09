@@ -32,13 +32,13 @@ export function RegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) })
 
-  if (user) return <Navigate to="/tasks" replace />
+  if (user) return <Navigate to="/today" replace />
 
   const onSubmit = async (values: RegisterForm) => {
     setServerError(null)
     try {
       await registerUser(values.email, values.password, values.displayName)
-      navigate('/tasks', { replace: true })
+      navigate('/today', { replace: true })
     } catch (error) {
       if (isAxiosError(error) && error.response?.status === 409) {
         setServerError(t('auth.errors.emailTaken'))
