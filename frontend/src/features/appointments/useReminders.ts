@@ -72,7 +72,8 @@ function notify(t: TFunction, appointment: Appointment): void {
   if (canNotify && document.visibilityState === 'hidden') {
     new Notification(title, { body })
   } else {
-    toast(title, { description: body })
+    // Un rappel ne doit pas s'effacer tout seul : il reste jusqu'à fermeture manuelle
+    toast(title, { description: body, duration: Infinity, closeButton: true })
   }
 }
 
@@ -81,8 +82,9 @@ function notify(t: TFunction, appointment: Appointment): void {
  * Notification navigateur si l'utilisateur l'a autorisée, sinon repli sur un toast.
  * Chaque rappel n'est joué qu'une fois (journal en localStorage) ; ceux déjà
  * échus avant le chargement au-delà de la fenêtre de rattrapage sont ignorés.
+ * `enabled` à false met le moteur en veille (l'utilisateur a coupé les rappels).
  */
-export function useReminders(): void {
+export function useReminders(enabled: boolean): void {
   const { t } = useTranslation()
   // Figé au montage : un `new Date()` recalculé à chaque rendu ferait boucler la requête
   const [range] = useState(() => {
@@ -94,7 +96,7 @@ export function useReminders(): void {
   const appointments = data?.items
 
   useEffect(() => {
-    if (!appointments) return
+    if (!enabled || !appointments) return
 
     const check = () => {
       const now = Date.now()
@@ -118,5 +120,5 @@ export function useReminders(): void {
     check()
     const timer = setInterval(check, TICK_MS)
     return () => clearInterval(timer)
-  }, [appointments, t])
+  }, [enabled, appointments, t])
 }

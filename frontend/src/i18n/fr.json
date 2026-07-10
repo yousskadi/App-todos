@@ -19,15 +19,15 @@
   },
   "reminders": {
     "title": "Rappel : {{title}}",
+    "menu": "Rappels",
+    "toggle": "Activer les rappels",
+    "defaultDelay": "Délai de rappel par défaut",
     "inMinutes_one": "dans {{count}} minute",
     "inMinutes_other": "dans {{count}} minutes",
     "inHours_one": "dans {{count}} heure",
     "inHours_other": "dans {{count}} heures",
     "inDays_one": "dans {{count}} jour",
-    "inDays_other": "dans {{count}} jours",
-    "enable": "Activer les notifications de rappel",
-    "enabled": "Notifications de rappel activées",
-    "blocked": "Notifications refusées — les rappels s’afficheront dans l’app"
+    "inDays_other": "dans {{count}} jours"
   },
   "categories": {
     "none": "Aucune",

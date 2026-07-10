@@ -96,3 +96,36 @@ test('ne rappelle pas un rendez-vous sans rappel configuré', async ({ page }) =
 
   await expect(page.getByText('Rappel : Sans rappel')).not.toBeVisible()
 })
+
+test('rappels coupés depuis l’en-tête : plus aucune notification', async ({ page }) => {
+  await page.getByRole('button', { name: 'Rappels' }).click()
+  await page.getByRole('menuitemcheckbox', { name: 'Activer les rappels' }).click()
+  await page.keyboard.press('Escape')
+
+  const start = new Date()
+  start.setMinutes(start.getMinutes() + 5, 0, 0)
+  const end = new Date(start)
+  end.setHours(end.getHours() + 1)
+
+  await page.getByRole('button', { name: 'Nouveau rendez-vous' }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Titre').fill('Silencieux')
+  await dialog.getByLabel('Début').fill(localInput(start))
+  await dialog.getByLabel('Fin').fill(localInput(end))
+  await dialog.getByRole('combobox', { name: 'Rappel' }).click()
+  await page.getByRole('option', { name: '5 minutes avant', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Rendez-vous créé')).toBeVisible()
+
+  await expect(page.getByText('Rappel : Silencieux')).not.toBeVisible()
+})
+
+test('le délai par défaut pré-remplit le rappel d’un nouveau rendez-vous', async ({ page }) => {
+  await page.getByRole('button', { name: 'Rappels' }).click()
+  await page.getByRole('menuitemradio', { name: '30 minutes avant' }).click()
+  await page.keyboard.press('Escape')
+
+  await page.getByRole('button', { name: 'Nouveau rendez-vous' }).click()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog.getByRole('combobox', { name: 'Rappel' })).toHaveText('30 minutes avant')
+})

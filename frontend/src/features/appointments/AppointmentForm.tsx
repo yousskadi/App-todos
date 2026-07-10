@@ -28,11 +28,21 @@ import {
   useUpdateAppointment,
 } from '@/features/appointments/api'
 import { atHour, toLocalInputValue } from '@/features/appointments/calendar'
+import { getDefaultReminderMinutes } from '@/features/appointments/reminderPrefs'
 import { APPOINTMENT_CATEGORIES } from '@/features/categories/categories'
 import { CategorySelect } from '@/features/categories/CategorySelect'
 import type { Appointment } from '@/types/api'
 
 const REMINDERS = ['none', '5', '15', '30', '60', '1440'] as const
+
+/** Valeur de rappel pré-remplie d'un nouveau RDV, depuis la préférence par défaut. */
+function defaultReminder(): (typeof REMINDERS)[number] {
+  const minutes = getDefaultReminderMinutes()
+  const value = minutes === null ? 'none' : String(minutes)
+  return (REMINDERS as readonly string[]).includes(value)
+    ? (value as (typeof REMINDERS)[number])
+    : 'none'
+}
 
 const appointmentFormSchema = z
   .object({
@@ -64,7 +74,7 @@ function toFormValues(appointment?: Appointment, defaultStart?: Date): Appointme
       start_at: toLocalInputValue(start.toISOString()),
       end_at: toLocalInputValue(end.toISOString()),
       category: '',
-      reminder: 'none',
+      reminder: defaultReminder(),
     }
   }
   return {
