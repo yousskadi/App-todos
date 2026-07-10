@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import { NotificationBell } from '@/features/appointments/NotificationBell'
+import { useReminders } from '@/features/appointments/useReminders'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
 import { cn } from '@/lib/utils'
@@ -11,6 +13,7 @@ export function AppLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const { t } = useTranslation()
+  useReminders()
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,6 +49,7 @@ export function AppLayout() {
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {user?.display_name}
             </span>
+            <NotificationBell />
             <Button
               variant="ghost"
               size="icon"
