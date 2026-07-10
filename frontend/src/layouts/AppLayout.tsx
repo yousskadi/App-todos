@@ -1,8 +1,12 @@
 import { CalendarCheck2, LogOut, Moon, Sun } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Outlet } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
+import { ReminderMenu } from '@/features/appointments/ReminderMenu'
+import { getRemindersEnabled, setRemindersEnabled } from '@/features/appointments/reminderPrefs'
+import { useReminders } from '@/features/appointments/useReminders'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
 import { cn } from '@/lib/utils'
@@ -11,6 +15,17 @@ export function AppLayout() {
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const { t } = useTranslation()
+  const [remindersEnabled, setRemindersEnabledState] = useState(getRemindersEnabled)
+  useReminders(remindersEnabled)
+
+  const changeReminders = (enabled: boolean) => {
+    setRemindersEnabledState(enabled)
+    setRemindersEnabled(enabled)
+    // À la réactivation, demander la permission navigateur si l'utilisateur n'a jamais tranché
+    if (enabled && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      void Notification.requestPermission()
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,6 +61,7 @@ export function AppLayout() {
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {user?.display_name}
             </span>
+            <ReminderMenu enabled={remindersEnabled} onEnabledChange={changeReminders} />
             <Button
               variant="ghost"
               size="icon"

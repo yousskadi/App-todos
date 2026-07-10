@@ -17,6 +17,18 @@
     "calendar": "Voir le calendrier",
     "noAppointments": "Aucun rendez-vous dans les 7 prochains jours"
   },
+  "reminders": {
+    "title": "Rappel : {{title}}",
+    "menu": "Rappels",
+    "toggle": "Activer les rappels",
+    "defaultDelay": "Délai de rappel par défaut",
+    "inMinutes_one": "dans {{count}} minute",
+    "inMinutes_other": "dans {{count}} minutes",
+    "inHours_one": "dans {{count}} heure",
+    "inHours_other": "dans {{count}} heures",
+    "inDays_one": "dans {{count}} jour",
+    "inDays_other": "dans {{count}} jours"
+  },
   "categories": {
     "none": "Aucune",
     "custom": "Autre…",
