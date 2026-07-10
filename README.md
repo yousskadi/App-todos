@@ -8,7 +8,7 @@ Application de gestion du quotidien : API FastAPI + frontend React, avec authent
 
 - **Ma journée** (page d'accueil) : tâches dues aujourd'hui ou en retard, et les prochains rendez-vous.
 - **Tâches** : CRUD complet, priorités, statuts, tags, date limite, recherche et filtres.
-- **Rendez-vous** : calendrier mensuel, lieu, rappel « N minutes avant ».
+- **Rendez-vous** : calendrier avec vues mois / semaine / jour, lieu, et rappel « N minutes avant » qui déclenche une notification navigateur (repli sur un toast dans l'app) — interrupteur et délai par défaut réglables depuis l'en-tête.
 - **Catégories** avec icône et couleur (médecin, dentiste, garage, courses, poubelles…) + texte libre.
 - Thème indigo clair/sombre.
 - Côté backend : observabilité trois signaux (traces OTel, logs JSON, métriques Prometheus avec exemplars), activable par flags — l'app sert de démo à une stack Grafana/Tempo/Loki.
