@@ -27,7 +27,7 @@ import {
   useDeleteAppointment,
   useUpdateAppointment,
 } from '@/features/appointments/api'
-import { toLocalInputValue } from '@/features/appointments/calendar'
+import { atHour, toLocalInputValue } from '@/features/appointments/calendar'
 import { APPOINTMENT_CATEGORIES } from '@/features/categories/categories'
 import { CategorySelect } from '@/features/categories/CategorySelect'
 import type { Appointment } from '@/types/api'
@@ -51,13 +51,12 @@ const appointmentFormSchema = z
 
 type AppointmentFormValues = z.infer<typeof appointmentFormSchema>
 
-function toFormValues(appointment?: Appointment, defaultDay?: Date): AppointmentFormValues {
+function toFormValues(appointment?: Appointment, defaultStart?: Date): AppointmentFormValues {
   if (!appointment) {
-    // Créneau par défaut : 9h–10h le jour cliqué (ou aujourd'hui)
-    const start = defaultDay ? new Date(defaultDay) : new Date()
-    start.setHours(9, 0, 0, 0)
+    // Créneau d'une heure à partir de l'heure cliquée (par défaut : 9h aujourd'hui)
+    const start = defaultStart ? new Date(defaultStart) : atHour(new Date(), 9)
     const end = new Date(start)
-    end.setHours(10)
+    end.setHours(start.getHours() + 1)
     return {
       title: '',
       description: '',
@@ -99,10 +98,15 @@ interface AppointmentFormProps {
   open: boolean
   onClose: () => void
   appointment?: Appointment
-  defaultDay?: Date
+  defaultStart?: Date
 }
 
-export function AppointmentForm({ open, onClose, appointment, defaultDay }: AppointmentFormProps) {
+export function AppointmentForm({
+  open,
+  onClose,
+  appointment,
+  defaultStart,
+}: AppointmentFormProps) {
   const { t } = useTranslation()
   const createAppointment = useCreateAppointment()
   const updateAppointment = useUpdateAppointment()
@@ -117,13 +121,13 @@ export function AppointmentForm({ open, onClose, appointment, defaultDay }: Appo
     formState: { errors, isSubmitting },
   } = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentFormSchema),
-    defaultValues: toFormValues(appointment, defaultDay),
+    defaultValues: toFormValues(appointment, defaultStart),
   })
 
   // Réinitialise le formulaire quand on ouvre pour un autre rendez-vous
   useEffect(() => {
-    if (open) reset(toFormValues(appointment, defaultDay))
-  }, [open, appointment, defaultDay, reset])
+    if (open) reset(toFormValues(appointment, defaultStart))
+  }, [open, appointment, defaultStart, reset])
 
   const onSubmit = async (values: AppointmentFormValues) => {
     const payload = toPayload(values)

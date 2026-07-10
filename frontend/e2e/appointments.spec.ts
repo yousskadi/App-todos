@@ -100,6 +100,71 @@ test('supprime un rendez-vous', async ({ page }) => {
   await expect(dayCell(page, day).getByText('À supprimer')).toBeHidden()
 })
 
+test('crée un rendez-vous depuis un créneau horaire en vue semaine', async ({ page }) => {
+  const day = new Date()
+  await page.getByRole('button', { name: 'Semaine', exact: true }).click()
+  await page.getByTestId(`timegrid-slot-${dayKey(day)}-14`).click()
+
+  const dialog = page.getByRole('dialog')
+  // Créneau prérempli : l'heure cliquée, pendant une heure
+  await expect(dialog.getByLabel('Début')).toHaveValue(`${dayKey(day)}T14:00`)
+  await expect(dialog.getByLabel('Fin')).toHaveValue(`${dayKey(day)}T15:00`)
+
+  await dialog.getByLabel('Titre').fill('Sport')
+  await dialog.getByRole('button', { name: 'Enregistrer' }).click()
+
+  await expect(page.getByText('Rendez-vous créé')).toBeVisible()
+  await expect(page.getByTestId('calendar-appointment')).toHaveText(/14:00\s*Sport/)
+})
+
+test('la vue jour se limite au jour affiché', async ({ page }) => {
+  const day = new Date()
+  await page.getByRole('button', { name: 'Jour', exact: true }).click()
+  await page.getByTestId(`timegrid-slot-${dayKey(day)}-10`).click()
+
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Titre').fill('Kiné')
+  await dialog.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(dialog).toBeHidden()
+
+  const appointment = page.getByTestId('calendar-appointment')
+  await expect(appointment).toBeVisible()
+
+  await page.getByRole('button', { name: 'Jour suivant' }).click()
+  await expect(appointment).toBeHidden()
+  await page.getByRole('button', { name: 'Jour précédent' }).click()
+  await expect(appointment).toBeVisible()
+})
+
+test('affiche côte à côte deux rendez-vous qui se chevauchent', async ({ page }) => {
+  const day = new Date()
+  await page.getByRole('button', { name: 'Jour', exact: true }).click()
+
+  await page.getByTestId(`timegrid-slot-${dayKey(day)}-10`).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Titre').fill('Réunion')
+  await dialog.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(dialog).toBeHidden()
+
+  // Le premier rendez-vous recouvre son créneau : on passe par le bouton de création
+  await page.getByRole('button', { name: 'Nouveau rendez-vous' }).click()
+  await dialog.getByLabel('Titre').fill('Appel')
+  await dialog.getByLabel('Début').fill(`${dayKey(day)}T10:30`)
+  await dialog.getByLabel('Fin').fill(`${dayKey(day)}T11:30`)
+  await dialog.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(dialog).toBeHidden()
+
+  const appointments = page.getByTestId('calendar-appointment')
+  await expect(appointments).toHaveCount(2)
+
+  // Chacun occupe une colonne : ils ne se superposent pas horizontalement
+  const first = await appointments.nth(0).boundingBox()
+  const second = await appointments.nth(1).boundingBox()
+  expect(first).not.toBeNull()
+  expect(second).not.toBeNull()
+  expect(first!.x + first!.width).toBeLessThanOrEqual(second!.x + 1)
+})
+
 test('navigue entre les mois', async ({ page }) => {
   const day = midMonth()
   await createAppointment(page, 'Ce mois-ci', day)
