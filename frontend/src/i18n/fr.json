@@ -111,7 +111,17 @@
     "today": "Aujourd'hui",
     "previousMonth": "Mois précédent",
     "nextMonth": "Mois suivant",
+    "previousWeek": "Semaine précédente",
+    "nextWeek": "Semaine suivante",
+    "previousDay": "Jour précédent",
+    "nextDay": "Jour suivant",
     "addOn": "Ajouter un rendez-vous le {{date}}",
+    "addAt": "Ajouter un rendez-vous le {{date}} à {{time}}",
+    "views": {
+      "month": "Mois",
+      "week": "Semaine",
+      "day": "Jour"
+    },
     "weekdays": {
       "mon": "Lun",
       "tue": "Mar",
