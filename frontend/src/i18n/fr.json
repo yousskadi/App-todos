@@ -21,7 +21,9 @@
     "title": "Rappel : {{title}}",
     "body": "À {{time}}",
     "bodyWithLocation": "À {{time}} · {{location}}",
-    "enable": "Activer les notifications de rappel"
+    "enable": "Activer les notifications de rappel",
+    "enabled": "Notifications de rappel activées",
+    "blocked": "Notifications refusées — les rappels s’afficheront dans l’app"
   },
   "categories": {
     "none": "Aucune",

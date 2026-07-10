@@ -35,6 +35,46 @@ test('déclenche le rappel (repli toast) quand son échéance est atteinte', asy
   await expect(page.getByText('Rappel : Dentiste')).toBeVisible()
 })
 
+test('affiche un toast même permission accordée quand l’onglet est au premier plan', async ({
+  page,
+}) => {
+  // Permission accordée mais onglet visible : la notif OS serait supprimée → toast attendu
+  await page.addInitScript(() => {
+    ;(window as unknown as { __notifs: number }).__notifs = 0
+    class Stub {
+      static permission = 'granted'
+      static requestPermission() {
+        return Promise.resolve('granted')
+      }
+      constructor() {
+        ;(window as unknown as { __notifs: number }).__notifs += 1
+      }
+    }
+    window.Notification = Stub as unknown as typeof Notification
+  })
+  // Recharge pour que le stub Notification s'applique (le beforeEach a déjà navigué)
+  await page.reload()
+  await expect(page).toHaveURL(/\/appointments$/)
+
+  const start = new Date()
+  start.setMinutes(start.getMinutes() + 5, 0, 0)
+  const end = new Date(start)
+  end.setHours(end.getHours() + 1)
+
+  await page.getByRole('button', { name: 'Nouveau rendez-vous' }).click()
+  const dialog = page.getByRole('dialog')
+  await dialog.getByLabel('Titre').fill('Réunion')
+  await dialog.getByLabel('Début').fill(localInput(start))
+  await dialog.getByLabel('Fin').fill(localInput(end))
+  await dialog.getByRole('combobox', { name: 'Rappel' }).click()
+  await page.getByRole('option', { name: '5 minutes avant', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Enregistrer' }).click()
+
+  await expect(page.getByText('Rappel : Réunion')).toBeVisible()
+  // Aucune notif OS émise tant que l'onglet est visible
+  expect(await page.evaluate(() => (window as unknown as { __notifs: number }).__notifs)).toBe(0)
+})
+
 test('ne rappelle pas un rendez-vous sans rappel configuré', async ({ page }) => {
   const start = new Date()
   start.setMinutes(start.getMinutes() + 5, 0, 0)

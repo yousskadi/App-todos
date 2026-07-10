@@ -55,7 +55,11 @@ function notify(t: TFunction, appointment: Appointment): void {
     ? t('reminders.bodyWithLocation', { time, location: appointment.location })
     : t('reminders.body', { time })
 
-  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+  // Onglet en arrière-plan et permission accordée : notification OS pour alerter
+  // hors de l'app. Sinon (onglet au premier plan, ou permission absente) : toast —
+  // une notif OS est souvent supprimée quand l'onglet a le focus.
+  const canNotify = typeof Notification !== 'undefined' && Notification.permission === 'granted'
+  if (canNotify && document.visibilityState === 'hidden') {
     new Notification(title, { body })
   } else {
     toast(title, { description: body })
