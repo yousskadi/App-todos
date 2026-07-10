@@ -27,38 +27,48 @@ frontend/   App React (src/), tests e2e Playwright (e2e/)
 docker-compose.yml
 ```
 
-## Démarrage (dev)
+## Démarrage
 
-Prérequis : Docker, Python ≥ 3.12, Node ≥ 20.
+Prérequis : Docker (Python ≥ 3.12 et Node ≥ 22 seulement pour le mode développement plus bas).
+
+D'abord les variables d'environnement (ne jamais commiter `.env`) :
 
 ```bash
-# 1. Variables d'environnement (ne jamais commiter .env)
 cp .env.example .env   # remplir POSTGRES_PASSWORD et JWT_SECRET (openssl rand -hex 32)
+```
 
-# 2. Base de données
+### Stack complète (recommandé)
+
+Toute l'application — PostgreSQL, backend et frontend — en une commande :
+
+```bash
+docker compose up -d --build   # app sur http://localhost:5173 (nginx proxifie /api)
+```
+
+Les migrations Alembic tournent au démarrage du backend. Pour rafraîchir après un changement : `docker compose up -d --build frontend` (ou `backend`). Pour arrêter : `docker compose down`.
+
+### Mode développement (hot reload)
+
+Pour travailler le code avec rechargement à chaud, on lance chaque service à la main et seul PostgreSQL reste dans Docker :
+
+```bash
 docker compose up -d postgres
 
-# 3. Backend (http://localhost:8000)
+# Backend (http://localhost:8000)
 cd backend
 python -m venv .venv && .venv/bin/pip install -e ".[dev]"
 export DATABASE_URL="postgresql+asyncpg://todos:<POSTGRES_PASSWORD>@localhost:5432/todos"
 export JWT_SECRET=<JWT_SECRET>
 .venv/bin/alembic upgrade head
-.venv/bin/uvicorn app.main:app --port 8000
+.venv/bin/uvicorn app.main:app --reload --port 8000
 
-# 4. Frontend (http://localhost:5173, proxifie /api vers le backend)
+# Frontend (http://localhost:5173, proxifie /api vers le backend)
 cd frontend
 npm install
 npm run dev
 ```
 
 L'API est documentée sur http://localhost:8000/docs. L'inscription demande un email, un nom d'affichage et un mot de passe d'au moins 12 caractères.
-
-### Stack complète via Docker
-
-```bash
-docker compose up -d --build   # frontend sur http://localhost:5173 (nginx proxifie /api)
-```
 
 ## Tests
 
