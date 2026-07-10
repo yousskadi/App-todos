@@ -19,8 +19,12 @@
   },
   "reminders": {
     "title": "Rappel : {{title}}",
-    "body": "À {{time}}",
-    "bodyWithLocation": "À {{time}} · {{location}}",
+    "inMinutes_one": "dans {{count}} minute",
+    "inMinutes_other": "dans {{count}} minutes",
+    "inHours_one": "dans {{count}} heure",
+    "inHours_other": "dans {{count}} heures",
+    "inDays_one": "dans {{count}} jour",
+    "inDays_other": "dans {{count}} jours",
     "enable": "Activer les notifications de rappel",
     "enabled": "Notifications de rappel activées",
     "blocked": "Notifications refusées — les rappels s’afficheront dans l’app"

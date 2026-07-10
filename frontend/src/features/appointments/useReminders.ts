@@ -45,15 +45,25 @@ function saveNotified(tokens: Set<string>): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed))
 }
 
+/** « dans 5 minutes » / « dans 1 heure » / « dans 1 jour » selon le délai du rappel. */
+function humanDelay(t: TFunction, minutes: number): string {
+  if (minutes % 1440 === 0) return t('reminders.inDays', { count: minutes / 1440 })
+  if (minutes % 60 === 0) return t('reminders.inHours', { count: minutes / 60 })
+  return t('reminders.inMinutes', { count: minutes })
+}
+
 function notify(t: TFunction, appointment: Appointment): void {
   const time = new Date(appointment.start_at).toLocaleTimeString('fr-FR', {
     hour: '2-digit',
     minute: '2-digit',
   })
   const title = t('reminders.title', { title: appointment.title })
-  const body = appointment.location
-    ? t('reminders.bodyWithLocation', { time, location: appointment.location })
-    : t('reminders.body', { time })
+  // Ex. « dans 5 minutes · 14:37 · Cabinet du centre »
+  const minutes = appointment.reminder_minutes_before
+  const parts = [time]
+  if (minutes != null) parts.unshift(humanDelay(t, minutes))
+  if (appointment.location) parts.push(appointment.location)
+  const body = parts.join(' · ')
 
   // Onglet en arrière-plan et permission accordée : notification OS pour alerter
   // hors de l'app. Sinon (onglet au premier plan, ou permission absente) : toast —

@@ -33,6 +33,8 @@ test('déclenche le rappel (repli toast) quand son échéance est atteinte', asy
 
   // Permission Notification non accordée dans Playwright → repli sur un toast
   await expect(page.getByText('Rappel : Dentiste')).toBeVisible()
+  // Le message indique le délai restant, l'heure et le lieu
+  await expect(page.getByText(/dans 5 minutes · \d{2}:\d{2} · Cabinet du centre/)).toBeVisible()
 })
 
 test('affiche un toast même permission accordée quand l’onglet est au premier plan', async ({
@@ -40,17 +42,18 @@ test('affiche un toast même permission accordée quand l’onglet est au premie
 }) => {
   // Permission accordée mais onglet visible : la notif OS serait supprimée → toast attendu
   await page.addInitScript(() => {
-    ;(window as unknown as { __notifs: number }).__notifs = 0
+    const g = globalThis as unknown as { __notifs: number; Notification: unknown }
+    g.__notifs = 0
     class Stub {
       static permission = 'granted'
       static requestPermission() {
         return Promise.resolve('granted')
       }
       constructor() {
-        ;(window as unknown as { __notifs: number }).__notifs += 1
+        g.__notifs += 1
       }
     }
-    window.Notification = Stub as unknown as typeof Notification
+    g.Notification = Stub
   })
   // Recharge pour que le stub Notification s'applique (le beforeEach a déjà navigué)
   await page.reload()
@@ -72,7 +75,9 @@ test('affiche un toast même permission accordée quand l’onglet est au premie
 
   await expect(page.getByText('Rappel : Réunion')).toBeVisible()
   // Aucune notif OS émise tant que l'onglet est visible
-  expect(await page.evaluate(() => (window as unknown as { __notifs: number }).__notifs)).toBe(0)
+  expect(
+    await page.evaluate(() => (globalThis as unknown as { __notifs: number }).__notifs),
+  ).toBe(0)
 })
 
 test('ne rappelle pas un rendez-vous sans rappel configuré', async ({ page }) => {
