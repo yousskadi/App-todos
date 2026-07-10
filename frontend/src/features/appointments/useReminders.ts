@@ -16,6 +16,21 @@ const STORAGE_KEY = 'todos.remindersNotified'
 /** Plafond du journal des rappels notifiés, pour ne pas gonfler indéfiniment. */
 const MAX_STORED = 500
 
+/**
+ * Jeton de déduplication opaque d'un rappel (hash FNV-1a de l'id + de l'heure de début).
+ * On stocke ce hash plutôt que les données du rendez-vous : rien d'exploitable ne
+ * persiste, et il change si l'heure du rendez-vous bouge, ce qui ré-arme le rappel.
+ */
+function reminderToken(id: string, startAt: string): string {
+  const input = `${id}@${startAt}`
+  let hash = 0x811c9dc5
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i)
+    hash = Math.imul(hash, 0x01000193)
+  }
+  return (hash >>> 0).toString(16)
+}
+
 function loadNotified(): Set<string> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -25,8 +40,8 @@ function loadNotified(): Set<string> {
   }
 }
 
-function saveNotified(keys: Set<string>): void {
-  const trimmed = Array.from(keys).slice(-MAX_STORED)
+function saveNotified(tokens: Set<string>): void {
+  const trimmed = Array.from(tokens).slice(-MAX_STORED)
   localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed))
 }
 
@@ -77,10 +92,10 @@ export function useReminders(): void {
           new Date(appointment.start_at).getTime() - appointment.reminder_minutes_before * 60_000
         // Seulement les rappels qui viennent d'échoir : ni à venir, ni trop anciens
         if (remindAt > now || remindAt <= now - LEEWAY_MS) continue
-        const key = `${appointment.id}@${appointment.start_at}`
-        if (notified.has(key)) continue
+        const token = reminderToken(appointment.id, appointment.start_at)
+        if (notified.has(token)) continue
         notify(t, appointment)
-        notified.add(key)
+        notified.add(token)
         changed = true
       }
       if (changed) saveNotified(notified)
