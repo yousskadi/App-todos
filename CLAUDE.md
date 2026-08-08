@@ -30,9 +30,11 @@ Playwright démarre backend + Vite tout seuls, mais les ports 8000/5173 doivent 
 
 - **Jamais de push direct sur `main`** (bloqué). Toute modif passe par une branche + PR ; un commit par étape, message « Étape N : … ».
 - **Pas de `Co-Authored-By` dans les messages de commit**, quel que soit le réglage par défaut hérité. L'historique d'avant le 2026-08-08 en porte encore, ne pas s'en servir comme modèle.
-- **Protection de `main`** : PR obligatoire, **9 checks requis** — `backend`, `frontend`, `e2e`, `gitleaks`, `deps`, `image`, `analyze (python)`, `analyze (javascript-typescript)`, et **`CodeQL`** (le check de *résultats*, pas seulement les jobs `analyze` : il échoue sur nouvelle alerte high+).
+- **Protection de `main`** : PR obligatoire, **10 checks requis** — `backend`, `frontend`, `e2e`, `gitleaks`, `deps`, `image`, `image-frontend`, `analyze (python)`, `analyze (javascript-typescript)`, et **`CodeQL`** (le check de *résultats*, pas seulement les jobs `analyze` : il échoue sur nouvelle alerte high+).
+- **Ajouter un check requis rend non mergeables les PR déjà ouvertes** : leur dernier commit ne porte pas ce check, et la protection attend un résultat qui n'arrivera jamais. Un `@dependabot rebase` (ou un rebase à la main) le règle.
 - CodeQL `js/clear-text-storage-of-sensitive-data` traite tout objet renvoyé par l'API comme « sensible » : ne pas persister de données de RDV/tâche en clair dans localStorage (stocker un jeton/hash opaque).
 - Dependabot : Claude merge les mineures/patch vertes, signale les majeures. Merger une PR touchant `.github/workflows/` exige le scope OAuth `workflow` sur `gh`.
+- **Les pins `github/codeql-action/*` se bumpent ensemble.** Dependabot traite `init` et `analyze` comme deux dépendances distinctes et n'en bouge qu'une : `analyze` refuse alors la config écrite par `init` (`Loaded a configuration file for version 'X', but running version 'Y'`). Une PR Dependabot qui ne touche qu'un des deux est à compléter à la main, pas à merger.
 
 ## Contrat inter-projets (homelab)
 
