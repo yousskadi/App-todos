@@ -33,6 +33,7 @@ Playwright démarre backend + Vite tout seuls, mais les ports 8000/5173 doivent 
 - **Protection de `main`** : PR obligatoire, **9 checks requis** — `backend`, `frontend`, `e2e`, `gitleaks`, `deps`, `image`, `analyze (python)`, `analyze (javascript-typescript)`, et **`CodeQL`** (le check de *résultats*, pas seulement les jobs `analyze` : il échoue sur nouvelle alerte high+).
 - CodeQL `js/clear-text-storage-of-sensitive-data` traite tout objet renvoyé par l'API comme « sensible » : ne pas persister de données de RDV/tâche en clair dans localStorage (stocker un jeton/hash opaque).
 - Dependabot : Claude merge les mineures/patch vertes, signale les majeures. Merger une PR touchant `.github/workflows/` exige le scope OAuth `workflow` sur `gh`.
+- **Les pins `github/codeql-action/*` se bumpent ensemble.** Dependabot traite `init` et `analyze` comme deux dépendances distinctes et n'en bouge qu'une : `analyze` refuse alors la config écrite par `init` (`Loaded a configuration file for version 'X', but running version 'Y'`). Une PR Dependabot qui ne touche qu'un des deux est à compléter à la main, pas à merger.
 
 ## Contrat inter-projets (homelab)
 
