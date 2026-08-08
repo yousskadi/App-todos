@@ -228,13 +228,21 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: "1"
-      - name: Vérifier que nginx démarre sans upstream joignable
-        # Le cas du cluster : la Gateway route /api avant ce pod, donc rien ne
-        # répond à BACKEND_URL. nginx résout ses upstreams au chargement de la
-        # conf, un nom en dur le fait sortir en [emerg] et le pod boucle.
+      - name: Vérifier que nginx démarre en non-root, sans upstream joignable
+        # Deux régressions attrapées ici, qu'un `docker build` laisse passer :
+        # - nginx résout ses upstreams au chargement de la conf, un nom en dur
+        #   le fait sortir en [emerg] et le pod boucle (la Gateway route /api
+        #   avant ce pod, donc rien ne répond à BACKEND_URL) ;
+        # - le conteneur doit tourner sans root ni capabilities, comme le
+        #   securityContext du homelab l'impose.
         run: |
-          docker run -d --name nginx-smoke -e BACKEND_URL=http://127.0.0.1:8000 \
-            -p 127.0.0.1:8099:80 app-todos-frontend:ci-scan
+          docker run -d --name nginx-smoke \
+            --user 10001:10001 --cap-drop ALL --read-only \
+            --tmpfs /etc/nginx/conf.d:uid=10001 \
+            --tmpfs /var/cache/nginx:uid=10001 \
+            --tmpfs /var/run:uid=10001 \
+            -e BACKEND_URL=http://127.0.0.1:8000 \
+            -p 127.0.0.1:8099:8080 app-todos-frontend:ci-scan
           for i in $(seq 1 15); do
             code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/ || true)
             if [ "$code" = "200" ]; then break; fi
