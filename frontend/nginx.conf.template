@@ -1,5 +1,9 @@
 server {
-    listen 80;
+    # 8080 et non 80 : un port < 1024 exige CAP_NET_BIND_SERVICE, que le
+    # securityContext du homelab retire (`drop: ["ALL"]`, `runAsNonRoot`).
+    # Docker masque le problème en autorisant les ports bas aux non-root
+    # (net.ipv4.ip_unprivileged_port_start=0), pas Kubernetes.
+    listen 8080;
     server_name _;
 
     root /usr/share/nginx/html;
