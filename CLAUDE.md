@@ -36,7 +36,8 @@ Playwright démarre backend + Vite tout seuls, mais les ports 8000/5173 doivent 
 
 ## Contrat inter-projets (homelab)
 
-- La CI publie l'image backend sur **`ghcr.io/yousskadi/app-todos-backend`** à chaque push sur `main`, taguée **`sha-<court>`** (tags immuables).
+- La CI publie **deux images** à chaque push sur `main`, taguées **`sha-<court>`** (tags immuables) : **`ghcr.io/yousskadi/app-todos-backend`** et **`ghcr.io/yousskadi/app-todos-frontend`**.
+- **L'image frontend attend `BACKEND_URL`** (défaut `http://backend:8000` pour docker compose ; côté homelab, le Service Kubernetes). Elle est rendue au démarrage par le mécanisme de templates de nginx. **Ne jamais réécrire l'upstream en dur** : nginx résout ses upstreams au chargement de la conf, un nom introuvable le fait sortir en `[emerg] host not found in upstream` et le pod boucle — même là où le bloc `/api` ne sert à rien parce que la Gateway route avant.
 - Le déploiement est piloté depuis **`gitlab.com/yk-devops/homelab-cloud-prive`** (GitOps ArgoCD), qui consomme cette image. Ce repo ne porte que le code + l'instrumentation, pas les manifestes.
 - **Bumper l'image = mettre à jour le manifeste homelab** vers le nouveau tag `sha-…`.
 - Flags backend, **tous à `False`/off par défaut**, activés côté homelab : `OTEL_ENABLED`, `LOG_JSON`, `METRICS_ENABLED` (et `RATE_LIMIT_ENABLED=0` seulement pour les e2e).

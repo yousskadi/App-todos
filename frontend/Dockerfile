@@ -6,9 +6,16 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:1.27-alpine
+# Tag de famille, pas une version figée : comme `python:3.12-slim` côté
+# backend, il continue de recevoir les correctifs Alpine. `1.27-alpine` ne
+# bougeait plus (Alpine 3.21) et portait 35 vulnérabilités corrigeables.
+FROM nginx:1.31-alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Rendu en /etc/nginx/conf.d/default.conf au démarrage, après substitution de
+# BACKEND_URL. Le défaut vaut pour docker compose ; le homelab l'écrase par le
+# Service Kubernetes (http://todos-backend:8000).
+ENV BACKEND_URL=http://backend:8000
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80

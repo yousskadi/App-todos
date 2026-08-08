@@ -85,7 +85,9 @@ cd frontend && npm run test:e2e
 
 ## CI
 
-Le workflow [`ci.yml`](.github/workflows/ci.yml) tourne sur chaque push/PR vers `main` : lint + tests backend contre Postgres 17, lint + build frontend, tests e2e Playwright (rapport uploadé en artefact en cas d'échec), plus les scans de sécurité — gitleaks (secrets), pip-audit/npm audit (dépendances), Trivy (image Docker, avant publication GHCR) et [CodeQL](.github/workflows/codeql.yml) (analyse statique). Guide de compréhension : [docs/securite-ci.md](docs/securite-ci.md).
+Le workflow [`ci.yml`](.github/workflows/ci.yml) tourne sur chaque push/PR vers `main` : lint + tests backend contre Postgres 17, lint + build frontend, tests e2e Playwright (rapport uploadé en artefact en cas d'échec), plus les scans de sécurité — gitleaks (secrets), pip-audit/npm audit (dépendances), Trivy (les deux images Docker, avant publication GHCR) et [CodeQL](.github/workflows/codeql.yml) (analyse statique). Guide de compréhension : [docs/securite-ci.md](docs/securite-ci.md).
+
+Sur `main`, deux images sont publiées sur GHCR, taguées par SHA de commit : `app-todos-backend` et `app-todos-frontend`. L'image frontend prend son upstream d'API dans `BACKEND_URL` (défaut `http://backend:8000`), substitué au démarrage de nginx.
 
 ## Documentation
 
