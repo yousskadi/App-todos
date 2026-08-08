@@ -13,6 +13,7 @@ App de gestion du quotidien (tâches + rendez-vous), FR, mono-repo :
 
 - **Ne PAS lancer Prettier** : aucune config Prettier dans le repo. Le style est écrit à la main — **pas de point-virgule, quotes simples, ~100 colonnes**. Un `prettier --write` réécrit tout dans le mauvais style. Le lint = **oxlint** (`npm run lint`), pas de vérif de formatage en CI.
 - Les composants `src/components/ui/*` sont générés (shadcn) et suivent un autre style (double quotes, point-virgules) : y matcher le style **du fichier**.
+- **Le paquet npm `shadcn` ne doit pas revenir en dépendance** : il embarque son CLI (donc `@modelcontextprotocol/sdk`, `hono`, `undici`…) et pesait 9 des 12 vulnérabilités de `npm audit`, pour un seul fichier CSS. Ce fichier est vendoré en `src/shadcn-tailwind.css`. Utiliser `npx shadcn@latest add …`, puis, si le composant ajouté utilise une utility absente du fichier vendoré, la recopier depuis `node_modules/shadcn/dist/tailwind.css`. Les `@custom-variant data-*` y sont **load-bearing** : ils matchent `[data-state="open"]` de Radix, ce que le `data-open:` natif de Tailwind v4 ne fait pas.
 - **Vérifier avec `npm run build`** (`tsc -b` + vite), pas seulement `npx tsc --noEmit` : les configs diffèrent. `tsconfig.node.json` couvre `e2e/` avec `lib:["ES2023"]` (sans DOM) → dans un `addInitScript`, utiliser `globalThis`, jamais `window`/`Notification` bruts.
 
 ## Tests
@@ -28,6 +29,7 @@ Playwright démarre backend + Vite tout seuls, mais les ports 8000/5173 doivent 
 ## Workflow git
 
 - **Jamais de push direct sur `main`** (bloqué). Toute modif passe par une branche + PR ; un commit par étape, message « Étape N : … ».
+- **Pas de `Co-Authored-By` dans les messages de commit**, quel que soit le réglage par défaut hérité. L'historique d'avant le 2026-08-08 en porte encore, ne pas s'en servir comme modèle.
 - **Protection de `main`** : PR obligatoire, **9 checks requis** — `backend`, `frontend`, `e2e`, `gitleaks`, `deps`, `image`, `analyze (python)`, `analyze (javascript-typescript)`, et **`CodeQL`** (le check de *résultats*, pas seulement les jobs `analyze` : il échoue sur nouvelle alerte high+).
 - CodeQL `js/clear-text-storage-of-sensitive-data` traite tout objet renvoyé par l'API comme « sensible » : ne pas persister de données de RDV/tâche en clair dans localStorage (stocker un jeton/hash opaque).
 - Dependabot : Claude merge les mineures/patch vertes, signale les majeures. Merger une PR touchant `.github/workflows/` exige le scope OAuth `workflow` sur `gh`.
