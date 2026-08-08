@@ -1,0 +1,32 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # SPA : toute route inconnue renvoie index.html
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API : même origine côté navigateur, pas de CORS à ouvrir.
+    #
+    # BACKEND_URL est substitué au démarrage par le mécanisme de templates de
+    # l'image nginx (/etc/nginx/templates). Il ne peut pas rester en dur :
+    # nginx résout un upstream littéral au CHARGEMENT de la conf, pas à la
+    # requête, et sort en [emerg] « host not found in upstream » si le nom est
+    # introuvable. Dans le cluster, `backend` n'existe pas -> CrashLoopBackOff,
+    # alors même que le bloc n'y sert à rien (la Gateway route /api vers le
+    # Service backend avant d'atteindre ce pod).
+    #
+    # Sans slash final : `proxy_pass .../;` amputerait le préfixe /api attendu
+    # par l'API.
+    location /api/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
