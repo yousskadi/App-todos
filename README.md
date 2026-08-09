@@ -68,7 +68,7 @@ npm install
 npm run dev
 ```
 
-L'API est documentée sur http://localhost:8000/docs. L'inscription demande un email, un nom d'affichage et un mot de passe d'au moins 12 caractères.
+L'API est documentée sur http://localhost:8000/api/docs. L'inscription demande un email, un nom d'affichage et un mot de passe d'au moins 12 caractères.
 
 ## Tests
 
