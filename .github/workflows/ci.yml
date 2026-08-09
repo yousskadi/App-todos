@@ -149,6 +149,30 @@ jobs:
         working-directory: frontend
         run: npx playwright test
 
+      # En-têtes de sécurité du frontend (#54). Ils ne vivent que dans la conf
+      # nginx : le serveur de dev Vite ne les sert pas, et sert au contraire des
+      # scripts inline qu'une CSP de production refuserait. Il faut donc
+      # l'image, et un vrai backend derrière son proxy /api — d'où ce job
+      # plutôt qu'un nouveau (un check requis de plus gèlerait les PR ouvertes).
+      - name: Démarrer l'image frontend
+        run: |
+          docker build -t app-todos-frontend:e2e frontend
+          docker run -d --name frontend-nginx --network host \
+            --user 10001:10001 --cap-drop ALL --read-only \
+            --tmpfs /etc/nginx/conf.d:uid=10001 \
+            --tmpfs /var/cache/nginx:uid=10001 \
+            --tmpfs /var/run:uid=10001 \
+            -e BACKEND_URL=http://127.0.0.1:8000 \
+            app-todos-frontend:e2e
+
+      - name: Tests des en-têtes de sécurité, contre l'image
+        working-directory: frontend
+        run: npx playwright test --config=playwright.nginx.config.ts
+
+      - name: Journaux nginx
+        if: always()
+        run: docker logs frontend-nginx
+
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
         with:
