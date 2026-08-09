@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:nginx": "playwright test --config=playwright.nginx.config.ts"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

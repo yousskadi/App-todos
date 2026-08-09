@@ -9,6 +9,32 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # En-têtes de sécurité. C'est ici qu'ils comptent : le HTML réellement
+    # interprété par le navigateur est servi par ce pod, pas par l'API.
+    #
+    # `always` pour qu'ils tiennent aussi sur les réponses d'erreur (4xx/5xx),
+    # que nginx sert sans les en-têtes ajoutés autrement. Et rien dans les
+    # blocs `location` : un seul `add_header` dans un `location` annulerait
+    # tous ceux hérités du bloc `server`, sans le moindre avertissement.
+    #
+    # `Strict-Transport-Security` est volontairement absent : le TLS est
+    # terminé par la Gateway du homelab, l'en-tête se pose là où la décision
+    # TLS est prise.
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy no-referrer always;
+
+    # CSP établie en observant le build Vite dans un navigateur, pas déduite :
+    # - script-src 'self' : Vite ne produit aucun script inline ;
+    # - style-src 'unsafe-inline' : imposé par la stack, Radix pose des
+    #   attributs `style` et sonner injecte une balise <style> à l'exécution ;
+    # - img-src data: : Vite inline les petits assets en URI de données ;
+    # - font-src 'self' : Inter est empaquetée (@fontsource), pas prise chez
+    #   Google ;
+    # - connect-src 'self' : les appels d'API passent par /api/ sur la même
+    #   origine, ce proxy existe pour ça.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;
+
     # SPA : toute route inconnue renvoie index.html
     location / {
         try_files $uri $uri/ /index.html;

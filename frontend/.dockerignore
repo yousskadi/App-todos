@@ -1,5 +1,6 @@
 node_modules/
 dist/
 e2e/
+e2e-nginx/
 playwright-report/
 test-results/

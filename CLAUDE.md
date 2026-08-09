@@ -22,6 +22,7 @@ App de gestion du quotidien (tâches + rendez-vous), FR, mono-repo :
 cd backend && .venv/bin/ruff check . && .venv/bin/pytest      # SQLite mém. par défaut
 cd frontend && npm run lint && npm run build
 cd frontend && npm run test:e2e                                # Postgres docker requis
+cd frontend && npm run test:e2e:nginx                          # en-têtes/CSP, contre l'image
 ```
 
 Playwright démarre backend + Vite tout seuls, mais les ports 8000/5173 doivent être libres : si la stack docker tourne, `docker compose stop backend frontend` (garder `postgres`) avant les e2e, puis `docker compose start backend frontend`.
@@ -40,6 +41,7 @@ Playwright démarre backend + Vite tout seuls, mais les ports 8000/5173 doivent 
 
 - La CI publie **deux images** à chaque push sur `main`, taguées **`sha-<court>`** (tags immuables) : **`ghcr.io/yousskadi/app-todos-backend`** et **`ghcr.io/yousskadi/app-todos-frontend`**.
 - **L'image frontend attend `BACKEND_URL`** (défaut `http://backend:8000` pour docker compose ; côté homelab, le Service Kubernetes). Elle est rendue au démarrage par le mécanisme de templates de nginx. **Ne jamais réécrire l'upstream en dur** : nginx résout ses upstreams au chargement de la conf, un nom introuvable le fait sortir en `[emerg] host not found in upstream` et le pod boucle — même là où le bloc `/api` ne sert à rien parce que la Gateway route avant.
+- **L'image frontend sert désormais les en-têtes de sécurité** (CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`). `Strict-Transport-Security` reste **hors de l'image**, à poser par la Gateway, là où la décision TLS est prise. La CSP a été établie au navigateur : `style-src` a besoin de `'unsafe-inline'` (Radix pose des attributs `style`, sonner injecte un `<style>`), `script-src` non. Toute règle `add_header` ajoutée dans un bloc `location` **annulerait silencieusement** celles du bloc `server`.
 - **L'image frontend écoute sur `8080`, pas `80`** : un port < 1024 exige `CAP_NET_BIND_SERVICE`, que le `securityContext` du homelab retire. Docker masque le problème, Kubernetes non.
 - **Le rendu du template écrit sur le disque**, donc `readOnlyRootFilesystem: true` exige **trois** volumes inscriptibles côté homelab : `/etc/nginx/conf.d` (conf rendue), `/var/cache/nginx`, `/var/run`. Le job `image-frontend` rejoue ces contraintes exactes en CI.
 - Le déploiement est piloté depuis **`gitlab.com/yk-devops/homelab-cloud-prive`** (GitOps ArgoCD), qui consomme cette image. Ce repo ne porte que le code + l'instrumentation, pas les manifestes.
