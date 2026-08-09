@@ -38,6 +38,12 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["app*"]
 
+# Sans cette ligne, `pip install .` (donc l'image Docker) construit une roue qui
+# ne contient que les .py : les assets de la doc manqueraient et /api/docs
+# retomberait sur des 404, en production seulement.
+[tool.setuptools.package-data]
+app = ["static/docs/*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"

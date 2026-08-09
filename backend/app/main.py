@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from slowapi.errors import RateLimitExceeded
 from slowapi.extension import _rate_limit_exceeded_handler
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.db.session import engine
+from app.docs import ASSETS_DIR, ASSETS_URL, OPENAPI_URL
+from app.docs import router as docs_router
 from app.logging_config import setup_logging
 from app.metrics import setup_metrics
 from app.middleware.rate_limit import limiter
@@ -19,8 +22,11 @@ def create_app() -> FastAPI:
         title="App Todos API",
         description="API de gestion de tâches et rendez-vous",
         version="0.1.0",
-        docs_url="/api/docs",
-        openapi_url="/api/openapi.json",
+        openapi_url=OPENAPI_URL,
+        # Pages de documentation servies par app.docs : assets vendorés et
+        # initialisation hors ligne, pour tenir sous une CSP sans inline ni CDN.
+        docs_url=None,
+        redoc_url=None,
     )
 
     app.state.limiter = limiter
@@ -36,6 +42,8 @@ def create_app() -> FastAPI:
             allow_headers=["Authorization", "Content-Type"],
         )
 
+    app.mount(ASSETS_URL, StaticFiles(directory=ASSETS_DIR), name="docs-assets")
+    app.include_router(docs_router)
     app.include_router(api_router, prefix="/api/v1")
     return app
 
