@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   analyze:
+    if: false # TEST JETABLE : les deux analyses sont skippées
     runs-on: ubuntu-latest
     permissions:
       contents: read

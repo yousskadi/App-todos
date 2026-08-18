@@ -93,3 +93,5 @@ Sur `main`, deux images sont publiées sur GHCR, taguées par SHA de commit : `a
 
 - [docs/securite-ci.md](docs/securite-ci.md) — comprendre chaque scan de la CI et les réflexes associés
 - [docs/adr/](docs/adr/) — décisions d'architecture (sécurité CI/CD, observabilité trois signaux)
+
+<!-- test jetable, ne pas merger -->
