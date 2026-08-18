@@ -10,8 +10,46 @@ permissions:
   contents: read
 
 jobs:
-  backend:
+  # Quels domaines la modification touche-t-elle ? Les jobs coûteux s'y abonnent
+  # pour ne pas tourner sur une PR de documentation.
+  # Le filtrage se fait par `if:` sur chaque job, jamais par `paths:` sur le
+  # workflow : un job skippé *dans un run qui a démarré* satisfait la protection
+  # de `main`, alors qu'un workflow jamais déclenché laisse ses checks requis en
+  # attente d'un résultat qui n'arrivera pas, et la PR reste bloquée.
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - id: filter
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # Base inconnue (force-push, première poussée) : on liste tout, donc rien
+          # n'est filtré. Le repli doit toujours activer les jobs, jamais échouer :
+          # un `changes` en échec les skipperait tous, et un skip satisfait un check
+          # requis — la PR deviendrait mergeable sans avoir rien testé.
+          files=$(git diff --name-only "$BASE_SHA" HEAD 2>/dev/null || git ls-files)
+          echo "$files"
+          # Une modification de la CI elle-même remet les deux domaines en jeu
+          for domaine in backend frontend; do
+            if echo "$files" | grep -qE "^($domaine|\.github/workflows)/"; then
+              echo "$domaine=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "$domaine=false" >> "$GITHUB_OUTPUT"
+            fi
+          done
+
+  backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: backend
@@ -43,7 +81,10 @@ jobs:
           TEST_DATABASE_URL: postgresql+asyncpg://todos:todos-ci@localhost:5432/todos_test
 
   frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: frontend
@@ -59,9 +100,11 @@ jobs:
       # inclut le typecheck (tsc -b) avant le bundle
       - run: npm run build
 
-  # Scan de secrets sur tout l'historique git
+  # Scan de secrets sur tout l'historique git : jamais filtré, un secret peut
+  # être introduit par n'importe quel fichier
   gitleaks:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write # commentaire sur la PR si une fuite est détectée
@@ -75,7 +118,10 @@ jobs:
 
   # Audit des dépendances (CVE connues) backend et frontend
   deps:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -93,8 +139,13 @@ jobs:
         working-directory: frontend
         run: npm audit --audit-level=high
 
+  # Teste les deux côtés ensemble (et l'image nginx), donc il suffit que l'un
+  # des deux bouge
   e2e:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:17-alpine
@@ -139,11 +190,16 @@ jobs:
           JWT_SECRET=secret-ci-uniquement-jamais-en-production \
             .venv/bin/alembic upgrade head
 
+      # Pas de `--with-deps` : il déclenche un `apt-get` des bibliothèques
+      # système de Chromium, que l'image `ubuntu-24.04` des runners fournit
+      # déjà. Cet apt est la seule étape qui dépende des miroirs Ubuntu, et il
+      # a bloqué des runs pendant près de deux heures le 2026-08-18 quand
+      # `azure.archive.ubuntu.com` a cessé de répondre.
       - name: Préparer le frontend
         working-directory: frontend
         run: |
           npm ci
-          npx playwright install --with-deps chromium
+          npx playwright install chromium
 
       - name: Tests e2e
         working-directory: frontend
@@ -185,6 +241,7 @@ jobs:
     # sur main, une fois les tests verts et le scan Trivy passé
     needs: [backend, e2e]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
@@ -233,6 +290,7 @@ jobs:
     # attendrait indéfiniment un check qui n'existe plus.
     needs: [frontend, e2e]
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: read
       packages: write
