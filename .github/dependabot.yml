@@ -9,11 +9,38 @@ updates:
     directory: /frontend
     schedule:
       interval: weekly
+    # A dependency joins the first group it matches, so `react` must stay above
+    # `npm-minor-patch`. React 19 needs react and react-dom on the exact same
+    # version: split across two PRs, the app renders a blank page and only the
+    # e2e job sees it (#61). Majors outside `react` keep one PR each.
+    groups:
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    # codeql-action/init and /analyze must move together: bumped in separate
+    # PRs, analyze rejects the config written by init and both PRs go red (#93).
+    groups:
+      actions:
+        patterns:
+          - "*"
   - package-ecosystem: docker
     directory: /backend
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /frontend
     schedule:
       interval: weekly
