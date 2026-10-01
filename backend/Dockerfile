@@ -1,16 +1,14 @@
 FROM python:3.12-slim
 
-# Rattrapage de paquets système dont l'image de base amont n'a pas encore intégré le
-# correctif. Debian l'a publié, mais python:3.12-slim n'a pas été rebuildée depuis :
-# un simple rebuild ne suffit donc pas, il faut upgrader explicitement.
-# À retirer quand l'image amont l'aura intégré : la CVE disparaîtra d'elle-même du
-# rapport du job `image`, qui ne bloque que sur les CVE corrigeables.
-#   - util-linux CVE-2026-53615 (HIGH, corrigée dans 2.41.5-0+deb13u1)
-#     Une seule CVE, mais 9 paquets binaires issus du même paquet source.
+# Debian has published these fixes but python:3.12-slim has not been rebuilt
+# since, so a plain rebuild keeps the vulnerable packages. Without this step the
+# Trivy scan of the `image` job fails on fixable HIGH CVEs (util-linux, openssl,
+# pcre2). Drop a package from the list once the upstream image ships its fix.
 RUN apt-get update && \
     apt-get install -y --only-upgrade \
         bsdutils libblkid1 liblastlog2-2 libmount1 libsmartcols1 libuuid1 \
-        login mount util-linux && \
+        login mount util-linux \
+        libpcre2-8-0 libssl3t64 openssl openssl-provider-legacy && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
