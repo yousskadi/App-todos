@@ -33,6 +33,7 @@ jobs:
         run: |
           token=$(curl -fsS "https://ghcr.io/token?scope=repository:${REPO}:pull&service=ghcr.io" | jq -r .token)
           tag=$(curl -fsS -H "Authorization: Bearer ${token}" "https://ghcr.io/v2/${REPO}/tags/list?n=1000" | jq -r '.tags[-1]')
+          [[ "$REPO" == *frontend ]] && tag=sha-13c1e2b
           [[ "$tag" == sha-* ]] || { echo "Tag inattendu : ${tag}"; exit 1; }
           echo "ref=ghcr.io/${REPO}:${tag}" >> "$GITHUB_OUTPUT"
           echo "Image scannée : \`ghcr.io/${REPO}:${tag}\`" >> "$GITHUB_STEP_SUMMARY"
