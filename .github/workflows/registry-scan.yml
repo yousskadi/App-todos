@@ -1,0 +1,44 @@
+name: Registry scan
+
+on:
+  schedule:
+    # Daily: the Trivy database changes every day, the published images do not
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Re-scans the images already published on GHCR. ci.yml only scans on a push
+  # or a PR, so a CVE disclosed after the last build stays invisible until
+  # someone pushes code. Detection only: nothing is rebuilt or republished
+  # here, a red run means "open a fix PR".
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [backend, frontend]
+    steps:
+      # The target is read from the registry, never from git: a commit that
+      # only touches docs publishes no image, so its sha tag does not exist.
+      # GHCR lists tags in push order, so the last one is the latest published.
+      - name: Résoudre le dernier tag publié
+        id: latest
+        env:
+          REPO: yousskadi/app-todos-${{ matrix.image }}
+        run: |
+          token=$(curl -fsS "https://ghcr.io/token?scope=repository:${REPO}:pull&service=ghcr.io" | jq -r .token)
+          tag=$(curl -fsS -H "Authorization: Bearer ${token}" "https://ghcr.io/v2/${REPO}/tags/list?n=1000" | jq -r '.tags[-1]')
+          [[ "$tag" == sha-* ]] || { echo "Tag inattendu : ${tag}"; exit 1; }
+          echo "ref=ghcr.io/${REPO}:${tag}" >> "$GITHUB_OUTPUT"
+          echo "Image scannée : \`ghcr.io/${REPO}:${tag}\`" >> "$GITHUB_STEP_SUMMARY"
+      - name: Scan Trivy (bloquant sur CRITICAL/HIGH corrigeables)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.latest.outputs.ref }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
