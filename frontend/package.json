@@ -18,8 +18,8 @@
     "axios": "^1.19.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "i18next": "^26.4.2",
-    "lucide-react": "^1.52.0",
+    "i18next": "^26.4.3",
+    "lucide-react": "^1.55.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.7.0",
     "react": "^19.3.0",
@@ -33,15 +33,15 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.0",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^24.19.1",
+    "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.87.0",
     "tailwindcss": "^4.3.2",
     "typescript": "~7.0.2",
-    "vite": "^8.3.3"
+    "vite": "^8.3.4"
   }
 }
