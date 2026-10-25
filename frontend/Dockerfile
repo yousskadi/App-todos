@@ -11,11 +11,12 @@ RUN npm run build
 # bougeait plus (Alpine 3.21) et portait 35 vulnérabilités corrigeables.
 FROM nginx:1.31-alpine
 
-# Alpine has published the libexpat, pcre2 and tiff fixes but nginx:1.31-alpine
-# has not been rebuilt since. Without this step the Trivy scan of the
-# `image-frontend` job fails on fixable HIGH CVEs (pcre2: CVE-2026-103111,
-# tiff: CVE-2026-4775). Drop a package once the upstream image ships its fix.
-RUN apk upgrade --no-cache libexpat pcre2 tiff
+# Alpine has published these fixes but nginx:1.31-alpine has not been rebuilt
+# since. Without this step the Trivy scan of the `image-frontend` job fails on
+# fixable HIGH CVEs (pcre2: CVE-2026-103111, tiff: CVE-2026-4775, libx11:
+# CVE-2026-88806, brotli-libs: CVE-2026-111497). Drop a package once the
+# upstream image ships its fix.
+RUN apk upgrade --no-cache brotli-libs libexpat libx11 pcre2 tiff
 
 # Rendu en /etc/nginx/conf.d/default.conf au démarrage, après substitution de
 # BACKEND_URL. Le défaut vaut pour docker compose ; le homelab l'écrase par le
