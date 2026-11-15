@@ -25,13 +25,15 @@ jobs:
       # The target is read from the registry, never from git: a commit that
       # only touches docs publishes no image, so its sha tag does not exist.
       # GHCR lists tags in push order, so the last one is the latest published.
+      # Only sha tags are kept: each image also carries a main-<timestamp> tag,
+      # and without the filter the check below would reject it.
       - name: Résoudre le dernier tag publié
         id: latest
         env:
           REPO: yousskadi/app-todos-${{ matrix.image }}
         run: |
           token=$(curl -fsS "https://ghcr.io/token?scope=repository:${REPO}:pull&service=ghcr.io" | jq -r .token)
-          tag=$(curl -fsS -H "Authorization: Bearer ${token}" "https://ghcr.io/v2/${REPO}/tags/list?n=1000" | jq -r '.tags[-1]')
+          tag=$(curl -fsS -H "Authorization: Bearer ${token}" "https://ghcr.io/v2/${REPO}/tags/list?n=1000" | jq -r '[.tags[] | select(startswith("sha-"))][-1] // empty')
           [[ "$tag" == sha-* ]] || { echo "Tag inattendu : ${tag}"; exit 1; }
           echo "ref=ghcr.io/${REPO}:${tag}" >> "$GITHUB_OUTPUT"
           echo "Image scannée : \`ghcr.io/${REPO}:${tag}\`" >> "$GITHUB_STEP_SUMMARY"
