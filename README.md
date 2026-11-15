@@ -4,6 +4,10 @@
 
 Application de gestion du quotidien : API FastAPI + frontend React, avec authentification complète et interface en français.
 
+![Architecture d'App-todos : la CI GitHub et GHCR, puis le déploiement sur le homelab kubeadm et sur OpenShift](docs/diagrams/app-todos.png)
+
+Source et réexport du schéma : [docs/diagrams/](docs/diagrams/README.md).
+
 ## Fonctionnalités
 
 - **Ma journée** (page d'accueil) : tâches dues aujourd'hui ou en retard, et les prochains rendez-vous.
