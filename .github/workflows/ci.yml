@@ -274,7 +274,12 @@ jobs:
         with:
           images: ghcr.io/yousskadi/app-todos-backend
           # Tag immuable par SHA de commit, pas de latest flottant (épinglage GitOps)
-          tags: type=sha,prefix=sha-,format=short
+          # The main-<UTC timestamp>-<sha> tag gives Renovate an order to compare;
+          # sha tags have none. Renovate's versioning regex on the homelab side
+          # expects exactly 14 digits, so changing the date format breaks bumps.
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=main-{{date 'YYYYMMDDHHmmss'}}-{{sha}}
       - if: github.event_name == 'push'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -345,7 +350,10 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/yousskadi/app-todos-frontend
-          tags: type=sha,prefix=sha-,format=short
+          # Same tag pair as the backend image, see the comment there.
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=raw,value=main-{{date 'YYYYMMDDHHmmss'}}-{{sha}}
       - if: github.event_name == 'push'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
