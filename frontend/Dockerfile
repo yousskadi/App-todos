@@ -11,11 +11,6 @@ RUN npm run build
 # bougeait plus (Alpine 3.21) et portait 35 vulnérabilités corrigeables.
 FROM nginx:1.31-alpine
 
-# Alpine ships libxslt 1.1.43-r4 (CVE-2026-125350, CVE-2026-87636, CVE-2026-9947)
-# but nginx:1.31-alpine still has r3, so Trivy fails on fixable HIGH CVEs.
-# Drop the package from this list once the upstream image ships the fix.
-RUN apk upgrade --no-cache libxslt
-
 # Rendu en /etc/nginx/conf.d/default.conf au démarrage, après substitution de
 # BACKEND_URL. Le défaut vaut pour docker compose ; le homelab l'écrase par le
 # Service Kubernetes (http://todos-backend:8000).
